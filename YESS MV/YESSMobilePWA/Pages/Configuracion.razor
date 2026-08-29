@@ -193,6 +193,12 @@
         {
             <div class="alert alert-info mt-3">@mensajeGitHub</div>
         }
+
+        <hr class="my-4" />
+
+        <h5 class="text-danger">Zona de peligro</h5>
+        <p class="text-muted">Esta acción eliminará todos tus datos, incluyendo movimientos, cuentas, categorías, personas, metas y credenciales de GitHub. No se puede deshacer.</p>
+        <button class="btn btn-danger" @onclick="RestablecerTodo">🗑 Restablecer todo</button>
     }
 </div>
 
@@ -400,6 +406,22 @@
         public Dictionary<string, GistArchivo> Files { get; set; } = new();
     }
 
+    // ================== RESTABLECER TODO ==================
+    private async Task RestablecerTodo()
+    {
+        var primera = await JS.InvokeAsync<bool>("confirm",
+            "⚠️ ¿Estás seguro? Esto eliminará TODOS tus datos: movimientos, cuentas, categorías, personas, metas y credenciales de GitHub.");
+        if (!primera) return;
+
+        var segunda = await JS.InvokeAsync<bool>("confirm",
+            "🚨 Esta acción NO se puede deshacer. ¿Confirmas el restablecimiento total?");
+        if (!segunda) return;
+
+        await JS.InvokeVoidAsync("localStorage.removeItem", "yes_gestor_data");
+        await JS.InvokeVoidAsync("location.reload");
+    }
+
+    // ================== CUENTAS ==================
     private void AbrirModalNuevaCuenta()
     {
         cuentaEditando = null;
@@ -479,6 +501,7 @@
         }
     }
 
+    // ================== CATEGORÍAS ==================
     private void AbrirModalNuevaCategoria()
     {
         categoriaEditando = null;
@@ -539,6 +562,7 @@
         }
     }
 
+    // ================== PERSONAS ==================
     private void AbrirModalNuevaPersona()
     {
         personaEditando = null;
@@ -599,6 +623,7 @@
         }
     }
 
+    // ================== PERSISTENCIA ==================
     private async Task PersistirDatos()
     {
         if (datosCache == null) return;
@@ -611,6 +636,7 @@
         StateHasChanged();
     }
 
+    // ================== IMPORTAR/EXPORTAR LOCAL ==================
     private async Task ImportarArchivo()
     {
         var contenido = await JS.InvokeAsync<string>("getFileContent", "fileInput");
@@ -644,6 +670,7 @@
         mensaje = "Exportación local completada. El recordatorio de backup se ha reiniciado.";
     }
 
+    // ================== GITHUB GIST ==================
     private async Task GuardarTokenGitHub()
     {
         if (datosCache == null) return;
